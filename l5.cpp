@@ -5,12 +5,14 @@
 
 std::string UTF8toSjis(std::string srcUTF8)
 {
+    /* convert unicode */
     int lenghtUnicode = MultiByteToWideChar(CP_UTF8, 0, srcUTF8.c_str(), srcUTF8.size() + 1, NULL, 0);
 
     wchar_t *bufUnicode = new wchar_t[lenghtUnicode];
 
     MultiByteToWideChar(CP_UTF8, 0, srcUTF8.c_str(), srcUTF8.size() + 1, bufUnicode, lenghtUnicode);
 
+    /* convert SJis */
     int lengthSJis = WideCharToMultiByte(CP_THREAD_ACP, 0, bufUnicode, -1, NULL, 0, NULL, NULL);
 
     char *bufShiftJis = new char[lengthSJis];
@@ -19,6 +21,7 @@ std::string UTF8toSjis(std::string srcUTF8)
 
     std::string strSJis(bufShiftJis);
 
+    /* buf delete */
     delete bufUnicode;
     delete bufShiftJis;
 
@@ -46,7 +49,12 @@ int main(int argc, char *argv[])
         }
         else if (std::filesystem::is_directory(i.path()))
         {
-            std::cout << "dir : " << UTF8toSjis(i.path().filename().string()) << std::endl;
+            /* blue sky -> 36m */
+            std::cout << "\033[36m"
+                      << "dir : "
+                      << UTF8toSjis(i.path().filename().string())
+                      << "\033[m"
+                      << std::endl;
         }
     }
 }
