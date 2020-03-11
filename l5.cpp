@@ -45,13 +45,12 @@ int main(int argc, char *argv[])
     {
         if (std::filesystem::is_regular_file(i.path()))
         {
-            std::cout << "file: " << UTF8toSjis(i.path().filename().string()) << std::endl;
+            std::cout << UTF8toSjis(i.path().filename().string()) << std::endl;
         }
         else if (std::filesystem::is_directory(i.path()))
         {
             /* blue sky -> 36m */
             std::cout << "\033[36m"
-                      << "dir : "
                       << UTF8toSjis(i.path().filename().string())
                       << "\033[m"
                       << std::endl;
