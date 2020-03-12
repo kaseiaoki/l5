@@ -39,25 +39,17 @@ bool getFilenames(std::string path, std::vector<std::string> &dirNames, std::vec
         }
         else if (std::filesystem::is_directory(i.path()))
         {
-            dirNames.push_back(UTF8toSjis(i.path().filename().string()));
+            dirNames.push_back("/" + UTF8toSjis(i.path().filename().string()));
         }
     }
     return true;
 }
 
-void printFiles(std::vector<std::string> &Names)
+void printList(std::vector<std::string> &Names)
 {
     for (int i = 0; i < Names.size(); ++i)
     {
         std::cout << Names.at(i) << std::endl;
-    }
-}
-
-void printDirs(std::vector<std::string> &Names)
-{
-    for (int i = 0; i < Names.size(); ++i)
-    {
-        std::cout << "/" << Names.at(i) << std::endl;
     }
 }
 
@@ -80,6 +72,6 @@ int main(int argc, char *argv[])
     /* get file names */
     getFilenames(targetPath, dirNames, fileNames);
     /* print */
-    printDirs(dirNames);
-    printFiles(fileNames);
+    printList(dirNames);
+    printList(fileNames);
 }
