@@ -2,6 +2,7 @@
 #include <iostream>
 #include <string>
 #include <Windows.h>
+#include <vector>
 
 std::string UTF8toSjis(std::string srcUTF8)
 {
@@ -28,32 +29,48 @@ std::string UTF8toSjis(std::string srcUTF8)
     return strSJis;
 }
 
-int main(int argc, char *argv[])
+bool getFilenames(std::string path, std::vector<std::string> &dirNames, std::vector<std::string> &fileNames)
 {
-    std::string tp;
-    /* dir option */
-    if (argv[1] != NULL)
-    {
-        tp = argv[1];
-    }
-    else
-    {
-        tp = ".";
-    }
-
-    for (const std::filesystem::directory_entry &i : std::filesystem::directory_iterator(tp))
+    for (const std::filesystem::directory_entry &i : std::filesystem::directory_iterator(path))
     {
         if (std::filesystem::is_regular_file(i.path()))
         {
-            std::cout << UTF8toSjis(i.path().filename().string()) << std::endl;
+            UTF8toSjis(i.path().filename().string());
+            fileNames.push_back(UTF8toSjis(i.path().filename().string()));
         }
         else if (std::filesystem::is_directory(i.path()))
         {
-            /* blue sky -> 36m */
-            std::cout << "\033[36m"
-                      << UTF8toSjis(i.path().filename().string())
-                      << "\033[m"
-                      << std::endl;
+            dirNames.push_back(UTF8toSjis(i.path().filename().string()));
         }
+    }
+    return true;
+}
+
+int main(int argc, char *argv[])
+{
+    std::string targetPath;
+    /* dir option */
+    if (argv[1] != NULL)
+    {
+        targetPath = argv[1];
+    }
+    else
+    {
+        targetPath = ".";
+    }
+
+    std::vector<std::string> fileNames;
+    std::vector<std::string> dirNames;
+
+    /* get filenames */
+    int size = getFilenames(targetPath, dirNames, fileNames);
+    /* display all files */
+    for (int i = 0; i < dirNames.size(); ++i)
+    {
+        std::cout << "/" << dirNames.at(i) << std::endl;
+    }
+    for (int i = 0; i < fileNames.size(); ++i)
+    {
+        std::cout << fileNames.at(i) << std::endl;
     }
 }
