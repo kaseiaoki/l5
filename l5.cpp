@@ -99,7 +99,7 @@ void printFile(std::vector<std::string> &Names, std::string path)
         fs::file_type fileType = status.type();
         std::string fileTypeString = getFileType(fileType);
         int size = fs::file_size(path+Names.at(i));
-        std::cout << Names.at(i) << "  " << size << "  {" <<  fileTypeString << "}" <<std::endl;
+        std::cout << Names.at(i) << "   " << size << "  " <<  fileTypeString <<std::endl;
     }
 }
 
@@ -107,7 +107,7 @@ void printDir(std::vector<std::string> &Names)
 {
     for (int i = 0; i < Names.size(); ++i)
     {
-        std::cout << Names.at(i) << "  dir" << std::endl;
+        std::cout << Names.at(i) << "       directory" << std::endl;
     }
 }
 
@@ -129,6 +129,7 @@ int main(int argc, char *argv[])
     std::vector<std::string> fileNames;
     std::vector<std::string> dirNames;
     getFilenames(targetPath, dirNames,fileNames);
+    
     /* print */
     printDir(dirNames);
     printFile(fileNames,targetPath);
