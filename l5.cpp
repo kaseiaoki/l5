@@ -115,6 +115,39 @@ std::string getFileType(fs::file_type type)
     }
 }
 
+std::string toFileTime(std::string path)
+{
+    auto ftime = fs::last_write_time(fs::u8path(path));
+    std::time_t tt = to_time_t(ftime);
+    std::tm *gmt = std::gmtime(&tt);
+    std::stringstream buffer;
+    buffer << std::put_time(gmt, "%d/%m/%Y %H:%M");
+    std::string formattedFileTime = buffer.str();
+    return formattedFileTime;
+}
+
+std::string toFormattedFileSize(std::string path)
+{
+    /* file size */
+    int size = -1;
+    /* closely max Capacity of win systeme -> 238822617088 */
+    /* need left padding for 12 times */
+    std::string sizeSpace = "            ";
+    if (fs::is_regular_file(path))
+    {
+        sizeSpace = " ";
+        size = fs::file_size(path);
+        int sizeDigit = digit(size);
+        /* closely max Capacity of win systeme -> 238822617088*/
+        int maxDigit = 13;
+        for (int i = 0; i < (13 - sizeDigit); i++)
+        {
+            sizeSpace += " ";
+        }
+    }
+    return sizeSpace + std::to_string(size);
+}
+
 bool getFilenames(std::string path, std::vector<std::string> &fileNames)
 {
     for (const fs::directory_entry &i : fs::directory_iterator(path))
@@ -132,48 +165,19 @@ void printFile(std::vector<std::string> &Names, std::string path)
         path += "/";
     }
 
-    // fs::space_info devi = fs::space("/..");
-    // fs::space_info tmpi = fs::space("/..");
-
-    // std::cout << ".        Capacity       Free      Available\n"
-    //           << "/dev:   " << devi.capacity << "   "
-    //           << devi.free << "   " << devi.available << '\n'
-    //           << "/tmp: " << tmpi.capacity << " "
-    //           << tmpi.free << " " << tmpi.available << '\n';
-    // 238822617088
-
     for (int i = 0; i < Names.size(); ++i)
     {
         std::string name = path + Names.at(i);
+        /* file type */
         fs::file_status status = fs::status(name);
         fs::file_type fileType = status.type();
         std::string fileTypeString = getFileType(fileType);
-        /* file size */
-        int size = -1;
-        /* closely max Capacity of win systeme -> 238822617088 */
-        /* need left padding for 12 times */
-        std::string sizeSpace = "            ";
-        if (fs::is_regular_file(name))
-        {
-            sizeSpace = " ";
-            size = fs::file_size(name);
-            int sizeDigit = digit(size);
-            /* closely max Capacity of win systeme -> 238822617088*/
-            int maxDigit = 13;
-            for (int i = 0; i < (13 - sizeDigit); i++)
-            {
-                sizeSpace += " ";
-            }
-        }
+        /* size */
+        std::string size = toFormattedFileSize(name);
         /* last write type */
-        auto ftime = fs::last_write_time(fs::u8path(name));
-        std::time_t tt = to_time_t(ftime);
-        std::tm *gmt = std::gmtime(&tt);
-        std::stringstream buffer;
-        buffer << std::put_time(gmt, "%d/%m/%Y %H:%M");
-        std::string formattedFileTime = buffer.str();
+        std::string formattedFileTime = toFileTime(name);
         /* print */
-        std::cout << fileTypeString << "  " << formattedFileTime << "  " << sizeSpace << size << "  " << UTF8toSjis(Names.at(i)) << std::endl;
+        std::cout << fileTypeString << "  " << formattedFileTime << size << "  " << UTF8toSjis(Names.at(i)) << std::endl;
     }
 }
 
