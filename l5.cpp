@@ -103,19 +103,12 @@ std::string getFileType(fs::file_type type)
     }
 }
 
-bool getFilenames(std::string path, std::vector<std::string> &dirNames, std::vector<std::string> &fileNames)
+bool getFilenames(std::string path, std::vector<std::string> &fileNames)
 {
     for (const fs::directory_entry &i : fs::directory_iterator(path))
     {
         std::string fileName = i.path().filename().string();
-        if (fs::is_regular_file(i.path()))
-        {
-            fileNames.push_back(fileName);
-        }
-        else if (fs::is_directory(i.path()))
-        {
-            dirNames.push_back(fileName);
-        }
+        fileNames.push_back(fileName);
     }
     return true;
 }
@@ -130,10 +123,17 @@ void printFile(std::vector<std::string> &Names, std::string path)
     for (int i = 0; i < Names.size(); ++i)
     {
         std::string name = path + Names.at(i);
-        fs::file_status status = fs::status(path + UTF8toSjis(name));
+        /* type */
+        fs::file_status status = fs::status(name);
         fs::file_type fileType = status.type();
         std::string fileTypeString = getFileType(fileType);
-        int size = fs::file_size(path + Names.at(i));
+        /* file size */
+        int size = -1;
+        if (fs::is_regular_file(name))
+        {
+            size = fs::file_size(path + Names.at(i));
+        }
+        /* last write type */
         auto ftime = fs::last_write_time(UTF8toSjis(name));
         std::time_t tt = to_time_t(ftime);
         std::tm *gmt = std::gmtime(&tt);
@@ -141,26 +141,6 @@ void printFile(std::vector<std::string> &Names, std::string path)
         buffer << std::put_time(gmt, "%A, %d %B %Y %H:%M");
         std::string formattedFileTime = buffer.str();
         std::cout << fileTypeString << "  " << formattedFileTime << "  " << size << "  " << UTF8toSjis(Names.at(i)) << std::endl;
-    }
-}
-
-void printDir(std::vector<std::string> &Names, std::string path)
-{
-
-    if (path.back() != '/')
-    {
-        path += "/";
-    }
-
-    for (int i = 0; i < Names.size(); ++i)
-    {
-        auto ftime = fs::last_write_time(UTF8toSjis(path + Names.at(i)));
-        std::time_t tt = to_time_t(ftime);
-        std::tm *gmt = std::gmtime(&tt);
-        std::stringstream buffer;
-        buffer << std::put_time(gmt, "%A, %d %B %Y %H:%M");
-        std::string formattedFileTime = buffer.str();
-        std::cout << "directory  " << formattedFileTime << "  " << UTF8toSjis(Names.at(i)) << std::endl;
     }
 }
 
@@ -180,10 +160,8 @@ int main(int argc, char *argv[])
 
     /* get file names */
     std::vector<std::string> fileNames;
-    std::vector<std::string> dirNames;
-    getFilenames(targetPath, dirNames, fileNames);
+    getFilenames(targetPath, fileNames);
 
     /* print */
-    printDir(dirNames, targetPath);
     printFile(fileNames, targetPath);
 }
