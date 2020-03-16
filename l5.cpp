@@ -134,7 +134,7 @@ void printFile(std::vector<std::string> &Names, std::string path)
             size = fs::file_size(path + Names.at(i));
         }
         /* last write type */
-        auto ftime = fs::last_write_time(UTF8toSjis(name));
+        auto ftime = fs::last_write_time(fs::u8path(name));
         std::time_t tt = to_time_t(ftime);
         std::tm *gmt = std::gmtime(&tt);
         std::stringstream buffer;
@@ -147,7 +147,6 @@ void printFile(std::vector<std::string> &Names, std::string path)
 int main(int argc, char *argv[])
 {
     std::string targetPath;
-
     /* dir option */
     if (argv[1] != NULL)
     {
