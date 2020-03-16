@@ -12,33 +12,31 @@ template <typename TP>
 std::time_t to_time_t(TP tp)
 {
     using namespace std::chrono;
-    auto sctp = time_point_cast<system_clock::duration>(tp - TP::clock::now()
-              + system_clock::now());
+    auto sctp = time_point_cast<system_clock::duration>(tp - TP::clock::now() + system_clock::now());
     return system_clock::to_time_t(sctp);
 }
 
 std::string SjistoUTF8(std::string srcSjis)
 {
-	int lenghtUnicode = MultiByteToWideChar(CP_THREAD_ACP, 0, srcSjis.c_str(), srcSjis.size() + 1, NULL, 0);
+    int lenghtUnicode = MultiByteToWideChar(CP_THREAD_ACP, 0, srcSjis.c_str(), srcSjis.size() + 1, NULL, 0);
 
-	wchar_t* bufUnicode = new wchar_t[lenghtUnicode];
+    wchar_t *bufUnicode = new wchar_t[lenghtUnicode];
 
-	MultiByteToWideChar(CP_THREAD_ACP, 0, srcSjis.c_str(), srcSjis.size() + 1, bufUnicode, lenghtUnicode);
+    MultiByteToWideChar(CP_THREAD_ACP, 0, srcSjis.c_str(), srcSjis.size() + 1, bufUnicode, lenghtUnicode);
 
-	int lengthUTF8 = WideCharToMultiByte(CP_UTF8, 0, bufUnicode, -1, NULL, 0, NULL, NULL);
+    int lengthUTF8 = WideCharToMultiByte(CP_UTF8, 0, bufUnicode, -1, NULL, 0, NULL, NULL);
 
-	char* bufUTF8 = new char[lengthUTF8];
+    char *bufUTF8 = new char[lengthUTF8];
 
-	WideCharToMultiByte(CP_UTF8, 0, bufUnicode, lenghtUnicode - 1, bufUTF8, lengthUTF8, NULL, NULL);
+    WideCharToMultiByte(CP_UTF8, 0, bufUnicode, lenghtUnicode - 1, bufUTF8, lengthUTF8, NULL, NULL);
 
-	std::string strUTF8(bufUTF8);
+    std::string strUTF8(bufUTF8);
 
-	delete bufUnicode;
-	delete bufUTF8;
+    delete bufUnicode;
+    delete bufUTF8;
 
-	return strUTF8;
+    return strUTF8;
 }
-
 
 std::string UTF8toSjis(std::string srcUTF8)
 {
@@ -67,41 +65,42 @@ std::string UTF8toSjis(std::string srcUTF8)
 
 std::string getFileType(fs::file_type type)
 {
-    switch (type) {
+    switch (type)
+    {
     case fs::file_type::none:
-      return "none";
-      break;
+        return "none";
+        break;
     case fs::file_type::not_found:
-      return "not found";
-      break;
+        return "not found";
+        break;
     case fs::file_type::regular:
-      return "regular file";
-      break;
+        return "regular file";
+        break;
     case fs::file_type::directory:
-      return  "directory file";
-      break;
+        return "directory file";
+        break;
     case fs::file_type::symlink:
-      return "symbolic link file";
-      break;
+        return "symbolic link file";
+        break;
     case fs::file_type::block:
-      return "block special file";
-      break;
+        return "block special file";
+        break;
     case fs::file_type::character:
-      return "character special file";
-      break;
+        return "character special file";
+        break;
     case fs::file_type::fifo:
-      return "FIFO or pipe file";
-      break;
+        return "FIFO or pipe file";
+        break;
     case fs::file_type::socket:
-      return "socket file";
-      break;
+        return "socket file";
+        break;
     case fs::file_type::unknown:
-      return "unknown type file";
-      break;
+        return "unknown type file";
+        break;
     default:
-      return "implementation-defined file type";
-      break;
-  }
+        return "implementation-defined file type";
+        break;
+    }
 }
 
 bool getFilenames(std::string path, std::vector<std::string> &dirNames, std::vector<std::string> &fileNames)
@@ -121,49 +120,47 @@ bool getFilenames(std::string path, std::vector<std::string> &dirNames, std::vec
     return true;
 }
 
-
 void printFile(std::vector<std::string> &Names, std::string path)
 {
-    if(path.back()!='/')
+    if (path.back() != '/')
     {
         path += "/";
     }
 
     for (int i = 0; i < Names.size(); ++i)
     {
-        std::string name = path+Names.at(i);
-        fs::file_status status = fs::status(path+ UTF8toSjis(name));
+        std::string name = path + Names.at(i);
+        fs::file_status status = fs::status(path + UTF8toSjis(name));
         fs::file_type fileType = status.type();
         std::string fileTypeString = getFileType(fileType);
-        int size = fs::file_size(path+Names.at(i));
-        std::cout << UTF8toSjis(name) <<std::endl;
+        int size = fs::file_size(path + Names.at(i));
         auto ftime = fs::last_write_time(UTF8toSjis(name));
         std::time_t tt = to_time_t(ftime);
         std::tm *gmt = std::gmtime(&tt);
         std::stringstream buffer;
         buffer << std::put_time(gmt, "%A, %d %B %Y %H:%M");
         std::string formattedFileTime = buffer.str();
-        std::cout << fileTypeString << "  " << formattedFileTime << "  "<< size << "  " <<  UTF8toSjis(Names.at(i)) <<std::endl;
+        std::cout << fileTypeString << "  " << formattedFileTime << "  " << size << "  " << UTF8toSjis(Names.at(i)) << std::endl;
     }
 }
 
 void printDir(std::vector<std::string> &Names, std::string path)
 {
- 
-     if(path.back()!='/')
+
+    if (path.back() != '/')
     {
         path += "/";
     }
 
     for (int i = 0; i < Names.size(); ++i)
     {
-        auto ftime = fs::last_write_time(UTF8toSjis(path+Names.at(i)));
+        auto ftime = fs::last_write_time(UTF8toSjis(path + Names.at(i)));
         std::time_t tt = to_time_t(ftime);
         std::tm *gmt = std::gmtime(&tt);
         std::stringstream buffer;
         buffer << std::put_time(gmt, "%A, %d %B %Y %H:%M");
         std::string formattedFileTime = buffer.str();
-        // std::cout << "directory  " << formattedFileTime  << "  " << UTF8toSjis(Names.at(i)) <<  std::endl;
+        std::cout << "directory  " << formattedFileTime << "  " << UTF8toSjis(Names.at(i)) << std::endl;
     }
 }
 
@@ -184,9 +181,9 @@ int main(int argc, char *argv[])
     /* get file names */
     std::vector<std::string> fileNames;
     std::vector<std::string> dirNames;
-    getFilenames(targetPath, dirNames,fileNames);
-    
+    getFilenames(targetPath, dirNames, fileNames);
+
     /* print */
-    printDir(dirNames,targetPath);
-    printFile(fileNames,targetPath);
+    printDir(dirNames, targetPath);
+    printFile(fileNames, targetPath);
 }
