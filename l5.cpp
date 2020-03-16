@@ -128,24 +128,21 @@ std::string toFileTime(std::string path)
 
 std::string toFormattedFileSize(std::string path)
 {
-    /* file size */
-    int size = -1;
-    /* closely max Capacity of win systeme -> 238822617088 */
-    /* need left padding for 12 times */
-    std::string sizeSpace = "            ";
     if (fs::is_regular_file(path))
     {
-        sizeSpace = " ";
-        size = fs::file_size(path);
+        int size = fs::file_size(path);
         int sizeDigit = digit(size);
-        /* closely max Capacity of win systeme -> 238822617088*/
+        /* closely max Capacity of win systeme -> 238822617088 */
+        /* need left padding for 12 times */
         int maxDigit = 13;
+        std::string sizeSpace = "";
         for (int i = 0; i < (13 - sizeDigit); i++)
         {
             sizeSpace += " ";
         }
+        return sizeSpace + std::to_string(size);
     }
-    return sizeSpace + std::to_string(size);
+    return "             ";
 }
 
 bool getFilenames(std::string path, std::vector<std::string> &fileNames)
@@ -164,7 +161,7 @@ void printFile(std::vector<std::string> &Names, std::string path)
     {
         path += "/";
     }
-
+    std::cout << "type                last write        size         name" << std::endl;
     for (int i = 0; i < Names.size(); ++i)
     {
         std::string name = path + Names.at(i);
